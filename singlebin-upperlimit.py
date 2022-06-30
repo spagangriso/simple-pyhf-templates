@@ -11,29 +11,29 @@ print("Setting up model.")
 
 sig = {
     "name": "signal",
-    "data": [6.0],
+    "data": [6.0], #expected nominal signal
     "modifiers": [
         {
-            "name": "mu",
+            "name": "mu", #multiplicative parameter for the signal x-section/strength
             "type": "normfactor",
             "data": None
         },
         {
             "name": "sys_sig_model",
             "type": "normsys",
-            "data": {"hi": (1+0.2), "lo": (1-0.2)}
+            "data": {"hi": (1+0.2), "lo": (1-0.2)} #assigns a 20% relative uncertainty to the signal yield
         }
     ]
 }
 
 bkg = {
     "name": "background",
-    "data": [9.0],
+    "data": [9.0], # exoected background
     "modifiers": [
         {
             "name": "sys_bkg_model",
             "type": "normsys",
-            "data": {"hi": (1+0.2), "lo": (1-0.2)}
+            "data": {"hi": (1+0.2), "lo": (1-0.2)} #assigns a 20% relative uncertainty to the background yield
         }
     ]   
 }
@@ -58,7 +58,7 @@ measurements = [
 observations = [
     {
         "name": "singlechannel",
-        "data": [9.0]        
+        "data": [9.0]  #observed data (or set equal to expected)
     }
 ]
 
