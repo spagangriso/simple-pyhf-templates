@@ -87,8 +87,8 @@ obs_limit, exp_limits = pyhf.infer.intervals.upperlimit(
     data, model, scan_poi, return_results=False)
 
 print("======== RESULTS =========")
-print(f"Observed limit: {obs_limit:.4f}")
+print(f"Observed limit on signal strength (mu): {obs_limit:.4f}")
 exp_lim = exp_limits[2]
 exp_lim_plus = exp_limits[3] - exp_lim
 exp_lim_minus = exp_lim - exp_limits[1]
-print(f"Expected limits: {exp_lim:.4f} +{exp_lim_plus:.4f} -{exp_lim_minus:.4f}")
+print(f"Expected limits on signal strength (mu): {exp_lim:.4f} +{exp_lim_plus:.4f} -{exp_lim_minus:.4f}")
