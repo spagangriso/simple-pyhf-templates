@@ -6,42 +6,12 @@ from pyhf.contrib.viz import brazil
 
 pyhf.set_backend("numpy")
 
-#######################################################################################
-from pyhf.infer import hypotest
-from pyhf import get_backend
-def _interp(x, xp, fp):
-    tb, _ = get_backend()
-    return tb.astensor(np.interp(x, xp.tolist(), fp.tolist()))
-
-def local_upperlimit(data, model, scan, level=0.05, return_results=False, **hypotest_kwargs):
-    """
-    Calculate an upper limit interval ``(0, poi_up)`` for a single
-    Parameter of Interest (POI) using a fixed scan through POI-space.
-    """
-    tb, _ = get_backend()
-    results = [
-        hypotest(mu, data, model, return_expected_set=True, **hypotest_kwargs)
-        for mu in scan
-    ]
-    obs = tb.astensor([[r[0]] for r in results])
-    exp = tb.astensor([[r[1][idx] for idx in range(5)] for r in results])
-
-    result_arrary = tb.concatenate([obs, exp], axis=1).T
-
-    # observed limit and the (0, +-1, +-2)sigma expected limits
-    limits = [_interp(level, result_arrary[idx][::-1], scan[::-1]) for idx in range(6)]
-    obs_limit, exp_limits = limits[0], limits[1:]
-
-    if return_results:
-        return obs_limit, exp_limits, (scan, results)
-    return obs_limit, exp_limits
-#######################################################################################
 
 print("Setting up model.")
 
 sig = {
     "name": "signal",
-    "data": [1.0], #expected nominal signal
+    "data": [1.36], #expected nominal signal, using proxy x-sec of 0.01fb
     "modifiers": [
         {
             "name": "mu", #multiplicative parameter for the signal x-section/strength
@@ -51,19 +21,19 @@ sig = {
         {
             "name": "sys_sig_model",
             "type": "normsys",
-            "data": {"hi": (1+0.01), "lo": (1-0.01)} #assigns a 1% (small) relative uncertainty to the signal yield
+            "data": {"hi": (1+0.01), "lo": (1-0.01)} #relative uncertainty on the signal yield
         }
     ]
 }
 
 bkg = {
     "name": "background",
-    "data": [0.05], # exoected background
+    "data": [0.83], # exoected background
     "modifiers": [
         {
             "name": "sys_bkg_model",
             "type": "normsys",
-            "data": {"hi": (1+0.02), "lo": (1-0.02)} #assigns a 2% relative uncertainty to the background yield
+            "data": {"hi": (1+0.51/0.83), "lo": (1-0.53/0.83)} #relative uncertainty on the background yield
         }
     ]   
 }
@@ -112,11 +82,11 @@ data = ws.data(model)
 #data = observations[0]["data"] + model.config.auxdata
 
 print("Calculating upper limits.")
-scan_poi = np.linspace(0.01, 5, 41)
-#obs_limit, exp_limits = pyhf.infer.intervals.upperlimit(
-obs_limit, exp_limits = local_upperlimit(
-    data, model, scan_poi, return_results=False, 
-        test_stat="qtilde", calctype='toybased', ntoys=100)
+#scan_poi = np.linspace(0.01, 5, 41)
+scan_poi = np.linspace(2.1, 2.5, 5)
+obs_limit, exp_limits = pyhf.infer.intervals.upper_limits.upper_limit(
+    data, model, scan_poi, return_results=False,
+    calctype='toybased',ntoys=10000)
 
 print("======== RESULTS =========")
 print(f"Observed limit on signal strength (mu): {obs_limit:.4f}")
